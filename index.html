@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>학교 매점·편의점 소비 설문조사</title>
+<style>
+  :root{
+    --primary:#4f46e5;
+    --primary-light:#eef2ff;
+    --bg:#f7f7fb;
+    --card:#ffffff;
+    --text:#1f2937;
+    --muted:#6b7280;
+    --border:#e5e7eb;
+    --success:#16a34a;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:24px 12px;
+  }
+  .wrap{
+    width:100%;
+    max-width:560px;
+  }
+  .progress-wrap{
+    margin-bottom:18px;
+  }
+  .progress-info{
+    display:flex;
+    justify-content:space-between;
+    font-size:13px;
+    color:var(--muted);
+    margin-bottom:6px;
+  }
+  .progress-bar-bg{
+    width:100%;
+    height:10px;
+    background:var(--border);
+    border-radius:999px;
+    overflow:hidden;
+  }
+  .progress-bar-fill{
+    height:100%;
+    background:linear-gradient(90deg,#6366f1,#4f46e5);
+    border-radius:999px;
+    transition:width .35s ease;
+    width:0%;
+  }
+  .card{
+    background:var(--card);
+    border-radius:20px;
+    box-shadow:0 4px 24px rgba(0,0,0,0.06);
+    padding:32px 26px;
+    min-height:380px;
+    display:flex;
+    flex-direction:column;
+    position:relative;
+    overflow:hidden;
+  }
+  .qnum{
+    font-size:13px;
+    font-weight:700;
+    color:var(--primary);
+    letter-spacing:.02em;
+    margin-bottom:10px;
+  }
+  .qtext{
+    font-size:19px;
+    font-weight:700;
+    line-height:1.5;
+    margin:0 0 22px 0;
+    white-space:pre-line;
+  }
+  .options{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    flex:1;
+  }
+  .opt{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    padding:14px 16px;
+    border:1.5px solid var(--border);
+    border-radius:14px;
+    cursor:pointer;
+    font-size:15px;
+    background:#fff;
+    transition:border-color .15s, background .15s, transform .1s;
+    text-align:left;
+  }
+  .opt:hover{
+    border-color:#a5b4fc;
+    background:var(--primary-light);
+  }
+  .opt.selected{
+    border-color:var(--primary);
+    background:var(--primary-light);
+    font-weight:600;
+  }
+  .opt .badge{
+    width:26px;
+    height:26px;
+    border-radius:50%;
+    background:var(--border);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:12px;
+    font-weight:700;
+    color:var(--muted);
+    flex-shrink:0;
+  }
+  .opt.selected .badge{
+    background:var(--primary);
+    color:#fff;
+  }
+  .likert-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:6px;
+    margin-top:8px;
+  }
+  .likert-labels{
+    display:flex;
+    justify-content:space-between;
+    font-size:12px;
+    color:var(--muted);
+    margin-top:10px;
+  }
+  .likert-btn{
+    flex:1;
+    aspect-ratio:1;
+    border-radius:50%;
+    border:1.5px solid var(--border);
+    background:#fff;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-weight:700;
+    font-size:15px;
+    cursor:pointer;
+    color:var(--muted);
+    transition:all .15s;
+  }
+  .likert-btn:hover{
+    border-color:#a5b4fc;
+    background:var(--primary-light);
+  }
+  .likert-btn.selected{
+    background:var(--primary);
+    border-color:var(--primary);
+    color:#fff;
+  }
+  .nav{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-top:22px;
+  }
+  .back-btn{
+    border:none;
+    background:none;
+    color:var(--muted);
+    font-size:14px;
+    cursor:pointer;
+    padding:8px 4px;
+    visibility:hidden;
+  }
+  .back-btn.show{visibility:visible;}
+  .hint{
+    font-size:12px;
+    color:var(--muted);
+  }
+  .done-screen{
+    text-align:center;
+    padding:40px 10px;
+  }
+  .done-screen .check{
+    width:64px;height:64px;border-radius:50%;
+    background:var(--primary-light);
+    display:flex;align-items:center;justify-content:center;
+    margin:0 auto 18px auto;
+    font-size:32px;
+    color:var(--success);
+  }
+  .done-screen h2{
+    margin:0 0 8px 0;
+    font-size:20px;
+  }
+  .done-screen p{
+    color:var(--muted);
+    font-size:14px;
+    line-height:1.6;
+  }
+  .copy-btn{
+    margin-top:20px;
+    padding:12px 20px;
+    border-radius:12px;
+    border:none;
+    background:var(--primary);
+    color:#fff;
+    font-weight:600;
+    font-size:14px;
+    cursor:pointer;
+  }
+  .copy-btn:active{transform:scale(.98);}
+  .toast{
+    margin-top:10px;
+    font-size:12px;
+    color:var(--success);
+    height:16px;
+  }
+  .title-header{
+    text-align:center;
+    margin-bottom:16px;
+  }
+  .title-header h1{
+    font-size:16px;
+    margin:0 0 4px 0;
+    color:var(--text);
+  }
+  .title-header p{
+    font-size:12px;
+    color:var(--muted);
+    margin:0;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="title-header">
+    <h1>학교 매점·편의점 소비 습관 설문조사</h1>
+    <p>한 문항씩 신중하게 답해 주세요. 응답을 선택하면 자동으로 다음 문항으로 넘어갑니다.</p>
+  </div>
+
+  <div class="progress-wrap">
+    <div class="progress-info">
+      <span id="progressText">0 / 18 문항 완료</span>
+      <span id="progressPct">0%</span>
+    </div>
+    <div class="progress-bar-bg">
+      <div class="progress-bar-fill" id="progressFill"></div>
+    </div>
+  </div>
+
+  <div class="card" id="card">
+    <!-- injected by JS -->
+  </div>
+</div>
+
+<script>
+// ⚠️ 배포 후 Google Apps Script 웹 앱 URL을 여기에 붙여넣으세요.
+// (관리자_통계대시보드.html 의 SCRIPT_URL 과 반드시 동일해야 합니다)
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby5BHYGwZ6oeACqbvRCpEQmJCgsbF6_Qw9VJ9cWcjyIqzD2TKENDWZqKk8bH4VswcRA/exec";
+
+const LIKERT_LABELS = ["전혀 그렇지 않다","그렇지 않다","보통이다","그렇다","매우 그렇다"];
+
+const questions = [
+  {
+    text: "1. 일주일에 학교 매점이나 편의점에서 물건을 몇 번 구매하나요?",
+    type: "choice",
+    options: ["거의 구매하지 않는다","1~2회","3~4회","5~6회","7회 이상"]
+  },
+  {
+    text: "2. 학교생활 중 일주일 평균 소비금액은 어느 정도인가요?",
+    type: "choice",
+    options: ["5천 원 미만","5천~1만 원","1만~2만 원","2만~3만 원","3만 원 이상"]
+  },
+  { text: "3. 상품을 살 때 가격을 중요하게 생각한다.", type:"likert" },
+  { text: "4. 가격이 조금 비싸더라도 맛이나 품질이 좋다면 구매한다.", type:"likert" },
+  { text: "5. 유명한 브랜드의 상품을 더 신뢰하고 구매하는 편이다.", type:"likert" },
+  { text: "6. 친구가 추천하거나 친구들이 많이 구매하는 상품에 관심이 생긴다.", type:"likert" },
+  { text: "7. SNS나 광고에서 자주 본 상품을 구매해보고 싶어진다.", type:"likert" },
+  { text: "8. 처음 보는 신제품이나 새로운 맛을 적극적으로 구매해보는 편이다.", type:"likert" },
+  { text: "9. 물건을 사기 전에 정말 필요한지 생각해보는 편이다.", type:"likert" },
+  { text: "10. 계획에 없던 상품을 보고 충동적으로 구매하는 경우가 있다.", type:"likert" },
+  {
+    text: "11. 같은 상품이라면 어떤 혜택이 가장 구매에 영향을 미치나요?",
+    type: "choice",
+    options: ["가격 할인","1+1 · 2+1","세트상품 할인","포인트 · 쿠폰","사은품"]
+  },
+  {
+    text: "12. 같은 종류의 상품 중 무엇을 가장 중요하게 생각하나요?",
+    type: "choice",
+    options: ["가격","맛","양","브랜드","디자인 · 포장"]
+  },
+  {
+    text: "13. 평소 자주 구매하는 상품은 무엇인가요?",
+    type: "choice",
+    options: ["음료","과자","빵","아이스크림","간편식","기타"]
+  },
+  { text: "14. 상품을 구매할 때 영양성분이나 건강을 고려하는 편이다.", type:"likert" },
+  { text: "15. 환경친화적인 포장이나 친환경 제품이라면 약간 더 비싸도 구매할 의향이 있다.", type:"likert" },
+  {
+    text: "16. 학교 매점을 이용하면서 가장 불편한 점은 무엇인가요?",
+    type: "choice",
+    options: ["가격이 비싸다","원하는 상품이 부족하다","줄이 길다","재고 · 품절 여부를 알기 어렵다","상품 정보를 미리 알기 어렵다","기타"]
+  },
+  {
+    text: "17. 학교에 추가된다면 가장 이용하고 싶은 서비스는 무엇인가요?",
+    type: "choice",
+    options: ["매점 재고 확인","인기 상품 순위","신제품 투표","개인 맞춤 상품 추천","할인 · 세트상품 정보","학생 상품 요청 시스템"]
+  },
+  {
+    text: "18. 다음 두 광고 중 어떤 상품을 더 구매하고 싶나요?\nA. 신제품 출시! 2,000원\nB. 학생들이 가장 많이 선택한 인기 신제품! 2,000원",
+    type: "choice",
+    options: ["A","B","비슷하다"]
+  }
+];
+
+const CIRCLED = ["①","②","③","④","⑤","⑥"];
+let current = 0;
+const answers = new Array(questions.length).fill(null);
+
+const card = document.getElementById("card");
+const progressFill = document.getElementById("progressFill");
+const progressText = document.getElementById("progressText");
+const progressPct = document.getElementById("progressPct");
+
+function updateProgress(){
+  const answeredCount = answers.filter(a => a !== null).length;
+  const pct = Math.round((answeredCount / questions.length) * 100);
+  progressFill.style.width = pct + "%";
+  progressText.textContent = answeredCount + " / " + questions.length + " 문항 완료";
+  progressPct.textContent = pct + "%";
+}
+
+function render(){
+  if(current >= questions.length){
+    renderDone();
+    return;
+  }
+  const q = questions[current];
+  let html = `<div class="qnum">문항 ${current+1} / ${questions.length}</div>`;
+  html += `<p class="qtext">${escapeHtml(q.text)}</p>`;
+
+  if(q.type === "choice"){
+    html += `<div class="options">`;
+    q.options.forEach((opt, i) => {
+      const sel = answers[current] === i ? "selected" : "";
+      html += `<div class="opt ${sel}" data-idx="${i}">
+                 <span class="badge">${CIRCLED[i]}</span>
+                 <span>${escapeHtml(opt)}</span>
+               </div>`;
+    });
+    html += `</div>`;
+  } else if(q.type === "likert"){
+    html += `<div class="likert-row">`;
+    for(let i=0;i<5;i++){
+      const sel = answers[current] === i ? "selected" : "";
+      html += `<div class="likert-btn ${sel}" data-idx="${i}">${i+1}</div>`;
+    }
+    html += `</div>`;
+    html += `<div class="likert-labels"><span>${LIKERT_LABELS[0]}</span><span>${LIKERT_LABELS[4]}</span></div>`;
+  }
+
+  html += `<div class="nav">
+             <button class="back-btn ${current>0?'show':''}" id="backBtn">← 이전 문항</button>
+             <span class="hint">답을 선택하면 자동으로 다음으로 넘어가요</span>
+           </div>`;
+
+  card.innerHTML = html;
+
+  card.querySelectorAll("[data-idx]").forEach(el => {
+    el.addEventListener("click", () => {
+      const idx = parseInt(el.getAttribute("data-idx"), 10);
+      answers[current] = idx;
+      updateProgress();
+      render(); // show selection state briefly then advance
+      setTimeout(() => {
+        current++;
+        render();
+      }, 260);
+    });
+  });
+
+  const backBtn = document.getElementById("backBtn");
+  if(backBtn){
+    backBtn.addEventListener("click", () => {
+      current--;
+      render();
+    });
+  }
+}
+
+let submitted = false;
+
+function renderDone(){
+  let html = `<div class="done-screen">
+    <div class="check">✓</div>
+    <h2>설문에 응답해 주셔서 감사합니다!</h2>
+    <p>모든 문항(총 ${questions.length}개)에 응답을 완료했어요.</p>
+    <p class="toast" id="submitStatus">응답 결과를 전송하는 중...</p>
+    <button class="copy-btn" id="copyBtn">응답 결과 텍스트로 복사하기</button>
+    <div class="toast" id="toast"></div>
+    <div class="nav" style="justify-content:center;margin-top:18px;">
+      <button class="back-btn show" id="backBtnDone">← 마지막 문항으로 돌아가기</button>
+    </div>
+  </div>`;
+  card.innerHTML = html;
+
+  if(!submitted){
+    submitted = true;
+    submitToServer();
+  }
+
+  document.getElementById("copyBtn").addEventListener("click", () => {
+    const lines = questions.map((q,i) => {
+      let ansLabel = "무응답";
+      if(answers[i] !== null){
+        ansLabel = q.type === "likert"
+          ? (answers[i]+1) + " (" + LIKERT_LABELS[answers[i]] + ")"
+          : CIRCLED[answers[i]] + " " + q.options[answers[i]];
+      }
+      return (i+1) + ". " + ansLabel;
+    });
+    const text = lines.join("\n");
+    navigator.clipboard.writeText(text).then(() => {
+      document.getElementById("toast").textContent = "복사되었습니다!";
+    }).catch(() => {
+      document.getElementById("toast").textContent = "복사에 실패했어요. 직접 선택해 복사해 주세요.";
+    });
+  });
+
+  document.getElementById("backBtnDone").addEventListener("click", () => {
+    current = questions.length - 1;
+    render();
+  });
+}
+
+function submitToServer(){
+  const statusEl = () => document.getElementById("submitStatus");
+  if(!SCRIPT_URL || SCRIPT_URL.indexOf("여기에") === 0){
+    if(statusEl()) statusEl().textContent = "⚠️ 관리자가 서버 URL을 아직 설정하지 않았어요. (응답이 저장되지 않습니다)";
+    return;
+  }
+  fetch(SCRIPT_URL, {
+    method: "POST",
+    headers: { "Content-Type": "text/plain;charset=utf-8" },
+    body: JSON.stringify({ answers: answers })
+  })
+  .then(() => {
+    if(statusEl()) statusEl().textContent = "✅ 응답이 정상적으로 전송되었습니다.";
+  })
+  .catch(() => {
+    if(statusEl()) statusEl().textContent = "⚠️ 전송에 실패했어요. 인터넷 연결을 확인해 주세요.";
+  });
+}
+
+function escapeHtml(str){
+  return str.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+}
+
+updateProgress();
+render();
+</script>
+</body>
+</html>
