@@ -163,6 +163,34 @@
     border-color:var(--primary);
     color:#fff;
   }
+  .tel-input{
+    width:100%;
+    padding:14px 16px;
+    border:1.5px solid var(--border);
+    border-radius:14px;
+    font-size:16px;
+    outline:none;
+    transition:border-color .15s;
+    box-sizing:border-box;
+  }
+  .tel-input:focus{
+    border-color:var(--primary);
+  }
+  .tel-next-btn{
+    margin-top:14px;
+    width:100%;
+    padding:14px;
+    border:none;
+    border-radius:14px;
+    background:var(--primary);
+    color:#fff;
+    font-weight:700;
+    font-size:15px;
+    cursor:pointer;
+  }
+  .tel-next-btn:active{
+    transform:scale(.98);
+  }
   .nav{
     display:flex;
     justify-content:space-between;
@@ -317,6 +345,11 @@ const questions = [
     text: "18. 다음 두 광고 중 어떤 상품을 더 구매하고 싶나요?\nA. 신제품 출시! 2,000원\nB. 학생들이 가장 많이 선택한 인기 신제품! 2,000원",
     type: "choice",
     options: ["A","B","비슷하다"]
+  },
+  {
+    text: "19. 설문조사 참여 이벤트에 참여하시려면 전화번호를 입력해주세요.",
+    type: "tel",
+    placeholder: "010-0000-0000"
   }
 ];
 
@@ -364,6 +397,10 @@ function render(){
     }
     html += `</div>`;
     html += `<div class="likert-labels"><span>${LIKERT_LABELS[0]}</span><span>${LIKERT_LABELS[4]}</span></div>`;
+  } else if(q.type === "tel"){
+    const val = answers[current] || "";
+    html += `<input type="tel" class="tel-input" id="telInput" placeholder="${q.placeholder||''}" value="${escapeHtml(val)}" autocomplete="tel">
+              <button class="tel-next-btn" id="telNextBtn">다음</button>`;
   }
 
   html += `<div class="nav">
@@ -393,6 +430,25 @@ function render(){
       render();
     });
   }
+
+  const telInput = document.getElementById("telInput");
+  const telNextBtn = document.getElementById("telNextBtn");
+  if(telInput && telNextBtn){
+    telInput.focus();
+    const goNext = () => {
+      const val = telInput.value.trim();
+      answers[current] = val === "" ? null : val;
+      updateProgress();
+      setTimeout(() => {
+        current++;
+        render();
+      }, 150);
+    };
+    telNextBtn.addEventListener("click", goNext);
+    telInput.addEventListener("keydown", (e) => {
+      if(e.key === "Enter") goNext();
+    });
+  }
 }
 
 let submitted = false;
@@ -420,9 +476,13 @@ function renderDone(){
     const lines = questions.map((q,i) => {
       let ansLabel = "무응답";
       if(answers[i] !== null){
-        ansLabel = q.type === "likert"
-          ? (answers[i]+1) + " (" + LIKERT_LABELS[answers[i]] + ")"
-          : CIRCLED[answers[i]] + " " + q.options[answers[i]];
+        if(q.type === "likert"){
+          ansLabel = (answers[i]+1) + " (" + LIKERT_LABELS[answers[i]] + ")";
+        } else if(q.type === "tel"){
+          ansLabel = answers[i];
+        } else {
+          ansLabel = CIRCLED[answers[i]] + " " + q.options[answers[i]];
+        }
       }
       return (i+1) + ". " + ansLabel;
     });
